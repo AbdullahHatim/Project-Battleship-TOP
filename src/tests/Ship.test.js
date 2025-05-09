@@ -31,5 +31,8 @@ describe('Ships interface tests', () =>{
     ship.hit()
     expect(ship.isSunk()).toBe(true)
   })
+  test('default length is 1', ()=>{
+    expect(ship.length).toBe(1)
+  })
 })
 
