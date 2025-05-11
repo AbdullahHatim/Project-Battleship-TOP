@@ -87,7 +87,7 @@ function gameController () {
     }
     // main update loop (event-based)
     async function update (e) {
-      if (!this.classList.contains('attacks')) return
+      if (!e.target.classList.contains('board-cell')) return
       if (isUpdating) return
       isUpdating = true
 
@@ -97,21 +97,17 @@ function gameController () {
         cell.style.animationDuration = '200ms'
         cell.style.animationState = 'paused'
         await Anim.onAnimation(stage2)
+        otherPlayer.gameboard.receiveAttack(cell.dataset.coord)
       }
 
-      updateBoards()
       // await new Promise((r) => setTimeout(r, 1000))
       if (otherPlayer.isComputer) {
         await makeComputerMove()
       } else {
         switchPlayer()
       }
-      for (const container of boardContainers) {
-        container.innerHTML = ''
-        prependLettersNumbers(container)
-      }
-      boardContainers[0].append(getBoardDiv(currentPlayer.gameboard.board))
-      boardContainers[1].append(getBoardDiv(otherPlayer.gameboard.attacks, true))
+
+      updateBoards()
       isUpdating = false
     }
 

@@ -11,7 +11,9 @@
   --board-container-padding: 2em;
   --board-color: wheat;
   --attacks-color: purple;
-  --current-color: blue;
+  --hit-color: red;
+  --miss-color: lightgrey;
+  --ship-color: blue;
 }
 [data-stage] {
   width: 100%;
@@ -27,6 +29,7 @@
     z-index: 1;
     height: 100%;
     width: 100%;
+    /* zoom: 0.8; */
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
@@ -46,7 +49,7 @@
       position: absolute;
       font-family: serif;
       --current-color: var(--board-color);
-      color: color-mix(in srgb, var(--board-color), #1c1c1c 70%);
+      color: hsl(from var(--board-color) 180 50% 50%);
       p {
         margin: 0;
       }
@@ -88,14 +91,14 @@
       &:hover {
         background: hsl(from white h s 90%);
       }
-      &[value='hit'] {
-        background: red;
+      &[data-value='hit'] {
+        background: var(--hit-color);
       }
-      &[value='miss'] {
-        background: red;
+      &[data-value='miss'] {
+        background: var(--miss-color);
       }
-      &[value='ship'] {
-        background: blue;
+      &[data-value='ship'] {
+        background: var(--ship-color);
         border: none;
       }
     }

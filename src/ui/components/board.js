@@ -6,7 +6,7 @@ export function getBoardDiv (map = new Map(), attacks = false) {
   if (attacks) div.className += ' attacks'
   let html = ''
   for (const [key, value] of map) {
-    html += `<div class="board-cell" coord="${key}" value="${
+    html += `<div class="board-cell" data-coord="${key}" data-value="${
       (() => {
         if (value instanceof Ship) return 'ship'
         return value
