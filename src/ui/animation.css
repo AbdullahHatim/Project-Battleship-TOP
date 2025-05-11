@@ -1,0 +1,11 @@
+/* [data-stage='2']{
+  animation : 
+} */
+@keyframes test {
+  from {
+    background-color: transparent;
+  }
+  to {
+    background-color: blueviolet;
+  }
+}
