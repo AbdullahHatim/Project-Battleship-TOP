@@ -11,6 +11,7 @@
   --board-container-padding: 2em;
   --board-color: wheat;
   --attacks-color: purple;
+  --cell-color: white;
   --hit-color: red;
   --miss-color: lightgrey;
   --ship-color: blue;
@@ -83,22 +84,52 @@
     aspect-ratio: 1/1;
     display: grid;
     grid-template-columns: repeat(10, 1fr);
+    &.overlay {
+      background-color: transparent;
+      position: absolute;
+      margin: var(--board-container-padding) 0;
+      top: 0;
+      --cell-color: transparent;
+      .board-cell {
+        pointer-events: none;
+        border: none;
+        /* transform: translate(-50%, -50%); */
+        /* zoom: 0.8; */
+        opacity: 0.8;
+        &[data-value='hit'] {
+          opacity: 1;
+          background-color: transparent;
+          &::before {
+            zoom: 2;
+            font-family: cursive;
+            font-weight: bold;
+            color: hsl(from var(--hit-color) h s 40%);
+            content: 'X';
+          }
+        }
+      }
+    }
     .board-cell {
-      background-color: white;
+      display: grid;
+      place-content: center;
+
+      background-color: var(--cell-color);
+      transition: var(--transition-time) ease-in background-color;
       height: var(--cell-width);
       aspect-ratio: 1/1;
       border: 1px black solid;
       &:hover {
         background: hsl(from white h s 90%);
       }
+
       &[data-value='hit'] {
-        background: var(--hit-color);
+        background-color: var(--hit-color);
       }
       &[data-value='miss'] {
-        background: var(--miss-color);
+        background-color: var(--miss-color);
       }
       &[data-value='ship'] {
-        background: var(--ship-color);
+        background-color: var(--ship-color);
         border: none;
       }
     }

@@ -40,6 +40,7 @@ function gameController () {
   let otherPlayer = players[1]
 
   currentPlayer.gameboard.placeShip('A1', 'A2')
+  currentPlayer.gameboard.placeShip('B5', 'C5', 'D5', 'E5', 'F5')
   otherPlayer.gameboard.placeShip('A10', 'B10')
 
   const resetPlayers = () => {
@@ -62,10 +63,8 @@ function gameController () {
     const html = /* js */`
     <div class="boards">
       <div class="board-container">
-        ${getBoardHTML(currentPlayer.gameboard.board)}
       </div>
       <div class="board-container attacks">
-        ${getBoardHTML(otherPlayer.gameboard.attacks, true)}
       </div>
     </div>`
 
@@ -73,18 +72,32 @@ function gameController () {
     const boardContainers = stage2.querySelectorAll('.board-container')
 
     let isUpdating = false
-    async function makeComputerMove () {
-      // currentPlayer.gameboard.receiveAttack('A1')
-    }
 
     function updateBoards () {
       for (const container of boardContainers) {
         container.innerHTML = ''
         prependLettersNumbers(container)
       }
-      boardContainers[0].append(getBoardDiv(currentPlayer.gameboard.board))
+      const currentPlayerAttackBoard = getBoardDiv(currentPlayer.gameboard.attacks)
+      currentPlayerAttackBoard.classList.add('overlay')
+      boardContainers[0].append(getBoardDiv(currentPlayer.gameboard.board), currentPlayerAttackBoard)
       boardContainers[1].append(getBoardDiv(otherPlayer.gameboard.attacks, true))
     }
+    async function makeComputerMove () {
+      let randomNumber = Math.floor((10 * Math.random()) + 1)
+      let randomLetter = Math.floor((10 * Math.random()))
+      let char = String.fromCharCode(65 + randomLetter)
+      let limit = 0
+      while (currentPlayer.gameboard.attacks.get(`${char}${randomNumber}`) !== null) {
+        limit++
+        if (limit > 1000) break
+        randomNumber = Math.floor((10 * Math.random()) + 1)
+        randomLetter = Math.floor((10 * Math.random()))
+        char = String.fromCharCode(65 + randomLetter)
+      }
+      return `${char}${randomNumber}`
+    }
+
     // main update loop (event-based)
     async function update (e) {
       if (!e.target.classList.contains('board-cell')) return
@@ -93,16 +106,28 @@ function gameController () {
 
       const cell = e.target
       if (cell.classList.contains('board-cell')) {
-        cell.style.animationName = 'bounceIn'
+        cell.style.animationName = 'bounceOut'
         cell.style.animationDuration = '200ms'
         cell.style.animationState = 'paused'
-        await Anim.onAnimation(stage2)
+        await Anim.onAnimationEnd(cell)
         otherPlayer.gameboard.receiveAttack(cell.dataset.coord)
+        cell.dataset.value = `${otherPlayer.gameboard.attacks.get(cell.dataset.coord)}`
+        cell.style.animationName = cell.dataset.value === 'hit' ? 'flipInX' : 'fadeIn'
+        cell.style.animationDuration = '300ms'
+        cell.style.animationState = 'paused'
+        await Anim.onAnimationEnd(cell)
+        Anim.pauseAnimation(cell)
       }
 
-      // await new Promise((r) => setTimeout(r, 1000))
       if (otherPlayer.isComputer) {
-        await makeComputerMove()
+        const move = await makeComputerMove()
+        const playerCell = document.querySelector(`.overlay [data-coord="${move}"]`)
+        playerCell.style.animationName = 'bounceOut'
+        playerCell.style.animationDuration = '200ms'
+        playerCell.style.animationState = 'running'
+        currentPlayer.gameboard.receiveAttack(playerCell.dataset.coord)
+        playerCell.dataset.value = `${currentPlayer.gameboard.attacks.get(playerCell.dataset.coord)}`
+        await Anim.onAnimationEnd(playerCell)
       } else {
         switchPlayer()
       }
