@@ -9,6 +9,9 @@
 :root {
   --cell-width: min(7.5vw, 40px);
   --board-container-padding: 2em;
+  --board-color: wheat;
+  --attacks-color: purple;
+  --current-color: blue;
 }
 [data-stage] {
   width: 100%;
@@ -16,7 +19,7 @@
   position: relative;
 }
 
-[data-stage='1'] {
+[data-stage='2'] {
   background-color: lightblue;
 
   .boards {
@@ -32,12 +35,8 @@
     align-items: center;
   }
 
-  .board:nth-child(1) {
-  }
-  .board:nth-child(2) {
-  }
   .board-container {
-    background-color: wheat;
+    background-color: var(--board-color);
     padding: var(--board-container-padding);
     position: relative;
 
@@ -46,11 +45,15 @@
       display: flex;
       position: absolute;
       font-family: serif;
-      color: grey;
+      --current-color: var(--board-color);
+      color: color-mix(in srgb, var(--board-color), #1c1c1c 70%);
+      p {
+        margin: 0;
+      }
     }
     .letters {
       padding: 0 var(--board-container-padding);
-      top: -1%;
+      top: 1.5ch;
       left: 0;
       width: 100%;
       p {
@@ -61,8 +64,7 @@
     .numbers {
       display: flex;
       flex-direction: column;
-      left: -1.3em;
-      padding: 0 var(--board-container-padding);
+      left: 1.5ch;
       p {
         height: 0;
         margin: 0;
@@ -86,10 +88,24 @@
       &:hover {
         background: hsl(from white h s 90%);
       }
+      &[value='hit'] {
+        background: red;
+      }
+      &[value='miss'] {
+        background: red;
+      }
+      &[value='ship'] {
+        background: blue;
+        border: none;
+      }
     }
+  }
+  .board-container:has(.attacks) {
+    --board-color: var(--attacks-color);
+    color: var(--letters-numbers-color);
   }
 }
 
-[data-stage='2'] {
+[data-stage='1'] {
   background-color: purple;
 }
