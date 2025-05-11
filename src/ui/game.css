@@ -4,6 +4,7 @@
   * {
     box-sizing: border-box;
   }
+  overflow: hidden;
 }
 
 :root {
@@ -76,6 +77,25 @@
         justify-content: center;
         align-items: center;
         height: var(--cell-width);
+      }
+    }
+    &[data-name] {
+      &::before {
+        content: attr(data-name);
+        position: absolute;
+        width: 50%;
+        background-color: inherit;
+        top: calc(var(--board-container-padding) / 1.5 * -1);
+        left: 50%;
+        transform: translate(-50%, -25%);
+        display: grid;
+        place-content: center;
+        padding: 0.5em;
+        font-family: cursive;
+        color: white;
+        box-sizing: border-box;
+        font-size: 1.5em;
+        font-weight: bold;
       }
     }
   }

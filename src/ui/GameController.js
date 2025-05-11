@@ -33,7 +33,7 @@ const prependLettersNumbers = (elem) => {
   numbers.innerHTML = lettersHTML
   elem.prepend(letters, numbers)
 }
-
+// where all the magic happens (connects everything together, DOM, Players, and Game flow/ Animations)
 function gameController () {
   const players = [new Player('player1'), new Player('computer', true)]
   let currentPlayer = players[0]
@@ -41,6 +41,7 @@ function gameController () {
 
   currentPlayer.gameboard.placeShip('A1', 'A2')
   currentPlayer.gameboard.placeShip('B5', 'C5', 'D5', 'E5', 'F5')
+  currentPlayer.gameboard.placeShip('J10')
   otherPlayer.gameboard.placeShip('A10', 'B10')
 
   const resetPlayers = () => {
@@ -62,9 +63,9 @@ function gameController () {
 
     const html = /* js */`
     <div class="boards">
-      <div class="board-container">
+      <div class="board-container" data-name="${currentPlayer.name}">
       </div>
-      <div class="board-container attacks">
+      <div class="board-container attacks" data-name="Attack ${otherPlayer.name}">
       </div>
     </div>`
 
@@ -98,13 +99,27 @@ function gameController () {
       return `${char}${randomNumber}`
     }
 
+    const boards = stage2.querySelector('.boards')
+    boards.style.animation = 'fadeInUpBig 1000ms forwards paused'
+    // boards.style.animationState = 'paused'
+    // Anim.startAnimation(boards)
+    // Anim.pauseAnimation(boards)
+    async function ready () {
+      Anim.startAnimation(boards)
+      await Anim.onAnimationEnd(boards)
+    }
     // main update loop (event-based)
     async function update (e) {
       if (!e.target.classList.contains('board-cell')) return
+      const cell = e.target
+      if (otherPlayer.gameboard.attacks.get(cell.dataset.coord)) {
+        cell.style.animation = 'headShake 100ms paused'
+        await Anim.onAnimation(cell)
+        return
+      }
       if (isUpdating) return
       isUpdating = true
 
-      const cell = e.target
       if (cell.classList.contains('board-cell')) {
         cell.style.animationName = 'bounceOut'
         cell.style.animationDuration = '200ms'
@@ -140,6 +155,7 @@ function gameController () {
       container.addEventListener('click', update)
     }
     updateBoards()
+    ready()
     return { stage: stage2, update }
   }
   let currentStage = getStage2()
