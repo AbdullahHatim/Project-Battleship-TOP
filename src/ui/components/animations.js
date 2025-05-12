@@ -76,13 +76,14 @@ function onAnimationEnd (element) {
 
 async function onAnimation (element) {
   startAnimation(element)
+  await onAnimationStart(element)
   await onAnimationEnd(element)
   pauseAnimation(element)
 }
 
-// async function wait (ms) {
-//   await new Promise()
-// }
+async function wait (ms) {
+  await new Promise(r => setTimeout(r, ms))
+}
 
 // Exporting all functions as named exports
 export {
@@ -92,5 +93,6 @@ export {
   isAnimationRunning,
   onAnimationStart,
   onAnimationEnd,
-  onAnimation
+  onAnimation,
+  wait
 }
