@@ -143,6 +143,7 @@ function gameController () {
         Anim.pauseAnimation(cell)
       }
 
+      if (checkSunkenBoard()) { finishUp(); return }
       if (otherPlayer.isComputer) {
         const move = await makeComputerMove()
         const playerCell = document.querySelector(`.overlay [data-coord="${move}"]`)
@@ -157,7 +158,6 @@ function gameController () {
       }
 
       updateBoards()
-      if (checkSunkenBoard()) { setStage(InfoStage); return }
       isUpdating = false
     }
 
@@ -165,7 +165,15 @@ function gameController () {
       container.addEventListener('click', update)
     }
     updateBoards()
-
+    const doneButton = document.createElement('button')
+    function finishUp () {
+      doneButton.click()
+    }
+    function isDone () {
+      return new Promise(resolve => {
+        doneButton.onclick = resolve
+      })
+    }
     async function done () {
       await Anim.wait(2000)
       boards.style.animation = 'fadeOutDownBig 1000ms forwards'
@@ -173,29 +181,40 @@ function gameController () {
     }
     // ready()
 
-    return Object.assign(new Stage(), { stage: stage2, update, ready, done })
+    return Object.assign(new Stage(), { name: 'gameplay', stage: stage2, update, ready, done, isDone, finishUp, doneButton })
   }
-  let currentStage
+
   // TODO: Add Flow Control function so That stages don't know about each other
   // * Each stage when they are done just release a isDone signal witch we wait for
   async function setStage (stageCB) {
-    if (currentStage) { await currentStage.done() }
-    currentStage = stageCB()
-    Stage.validateProperties(currentStage)
+    const stage = stageCB()
+    Stage.validateProperties(stage)
     stageContent.innerHTML = ''
-    stageContent.appendChild(currentStage.stage)
-    await currentStage.ready()
+    stageContent.appendChild(stage.stage)
+    await stage.ready()
+    await stage.isDone()
+    await stage.done()
   }
+  setStage(Stage2)
+
   function InfoStage () {
     const stage = document.createElement('div')
     stage.innerHTML = `<h1>${winner.name}</h1>`
     async function update () {}
     async function ready () {}
     async function done () {}
-
-    return Object.assign(new Stage(), { stage, update, ready, done })
+    const doneButton = document.createElement('button')
+    function finishUp () {
+      doneButton.click()
+    }
+    function isDone () {
+      return new Promise(resolve => {
+        doneButton.onclick = resolve
+      })
+    }
+    return Object.assign(new Stage(), { name: 'info', stage, update, ready, done, isDone, finishUp, doneButton })
   }
-  setStage(Stage2)
+
   // (async () => { await new Promise(r => setTimeout(r, 3000)); setStage(Stage2); console.log('done') })()
   function refreshStage () {
     currentStage.update()
