@@ -5,6 +5,7 @@
     box-sizing: border-box;
   }
   overflow: hidden;
+  background-color: lightblue;
 }
 
 :root {
@@ -24,8 +25,6 @@
 }
 
 [data-stage='2'] {
-  background-color: lightblue;
-
   .boards {
     position: relative;
     z-index: 1;

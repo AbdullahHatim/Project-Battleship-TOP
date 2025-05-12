@@ -6,6 +6,7 @@ import * as Anim from './components/animations'
 import 'animate.css'
 import './game.css'
 import './animation.css'
+import { Stage } from './components/Stage'
 
 const content = document.querySelector('#content')
 const stageContent = document.createElement('div')
@@ -155,16 +156,28 @@ function gameController () {
       container.addEventListener('click', update)
     }
     updateBoards()
-    ready()
-    return { stage: stage2, update }
+
+    async function done () {
+      boards.style.animation = 'fadeOutDownBig 1000ms forwards paused'
+      Anim.startAnimation(boards)
+      await Anim.onAnimationEnd(boards)
+    }
+    // ready()
+    const stage = new Stage()
+    Object.assign(stage, { stage: stage2, update, ready, done })
+    return stage
   }
-  let currentStage = getStage2()
-  const setStage = (stageCB) => {
+  let currentStage
+  const setStage = async (stageCB) => {
+    if (currentStage) await currentStage.done()
     currentStage = stageCB()
+    Stage.validateProperties(currentStage)
     stageContent.innerHTML = ''
     stageContent.appendChild(currentStage.stage)
+    await currentStage.ready()
   }
   setStage(getStage2)
+  // (async () => { await new Promise(r => setTimeout(r, 3000)); setStage(getStage2); console.log('done') })()
   function refreshStage () {
     currentStage.update()
   }
