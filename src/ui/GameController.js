@@ -39,6 +39,7 @@ function gameController () {
   const players = [new Player('player1'), new Player('computer', true)]
   let currentPlayer = players[0]
   let otherPlayer = players[1]
+  let winner
 
   currentPlayer.gameboard.placeShip('A1', 'A2')
   currentPlayer.gameboard.placeShip('B5', 'C5', 'D5', 'E5', 'F5')
@@ -57,7 +58,7 @@ function gameController () {
     [currentPlayer, otherPlayer] = [otherPlayer, currentPlayer]
   }
 
-  function getStage2 () {
+  function Stage2 () {
     const stage2 = document.createElement('div')
     stage2.dataset.stage = '2'
     stage2.className = 'stage'
@@ -99,12 +100,19 @@ function gameController () {
       }
       return `${char}${randomNumber}`
     }
-
+    function checkSunkenBoard () {
+      if (currentPlayer.gameboard.isAllSunk()) {
+        winner = otherPlayer
+        return true
+      }
+      if (otherPlayer.gameboard.isAllSunk()) {
+        winner = currentPlayer
+        return true
+      }
+      return false
+    }
     const boards = stage2.querySelector('.boards')
     boards.style.animation = 'fadeInUpBig 1000ms forwards paused'
-    // boards.style.animationState = 'paused'
-    // Anim.startAnimation(boards)
-    // Anim.pauseAnimation(boards)
     async function ready () {
       Anim.startAnimation(boards)
       await Anim.onAnimationEnd(boards)
@@ -149,6 +157,7 @@ function gameController () {
       }
 
       updateBoards()
+      if (checkSunkenBoard()) { setStage(InfoStage); return }
       isUpdating = false
     }
 
@@ -158,26 +167,36 @@ function gameController () {
     updateBoards()
 
     async function done () {
-      boards.style.animation = 'fadeOutDownBig 1000ms forwards paused'
-      Anim.startAnimation(boards)
-      await Anim.onAnimationEnd(boards)
+      await Anim.wait(2000)
+      boards.style.animation = 'fadeOutDownBig 1000ms forwards'
+      await Anim.onAnimation(boards)
     }
     // ready()
-    const stage = new Stage()
-    Object.assign(stage, { stage: stage2, update, ready, done })
-    return stage
+
+    return Object.assign(new Stage(), { stage: stage2, update, ready, done })
   }
   let currentStage
-  const setStage = async (stageCB) => {
-    if (currentStage) await currentStage.done()
+  // TODO: Add Flow Control function so That stages don't know about each other
+  // * Each stage when they are done just release a isDone signal witch we wait for
+  async function setStage (stageCB) {
+    if (currentStage) { await currentStage.done() }
     currentStage = stageCB()
     Stage.validateProperties(currentStage)
     stageContent.innerHTML = ''
     stageContent.appendChild(currentStage.stage)
     await currentStage.ready()
   }
-  setStage(getStage2)
-  // (async () => { await new Promise(r => setTimeout(r, 3000)); setStage(getStage2); console.log('done') })()
+  function InfoStage () {
+    const stage = document.createElement('div')
+    stage.innerHTML = `<h1>${winner.name}</h1>`
+    async function update () {}
+    async function ready () {}
+    async function done () {}
+
+    return Object.assign(new Stage(), { stage, update, ready, done })
+  }
+  setStage(Stage2)
+  // (async () => { await new Promise(r => setTimeout(r, 3000)); setStage(Stage2); console.log('done') })()
   function refreshStage () {
     currentStage.update()
   }
