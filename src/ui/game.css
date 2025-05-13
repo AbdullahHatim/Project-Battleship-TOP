@@ -210,6 +210,9 @@
     }
   }
   .ships {
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
     .board {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -227,6 +230,8 @@
     grid-template-columns: repeat(10, 1fr);
 
     &.ships {
+      -webkit-user-drag: all;
+      pointer-events: all;
       background-color: transparent;
       .board-cell {
         border: none;
@@ -255,6 +260,8 @@
       .draggable-ship {
         /* position: relative; */
         /* z-index: 0; */
+        /* display: grid; */
+        /* grid-template-rows: repeat(5, 1fr); */
         color: black;
         width: 100%;
         height: calc(((100% + 1px) * attr(data-length type(<number>))));
@@ -263,7 +270,32 @@
         &:hover {
           background-color: red;
         }
+
+        position: relative;
+        &[data-holding='true'] {
+          position: fixed;
+          transform: translate(-50%, -90%);
+          width: var(--cell-width);
+          height: calc(var(--cell-width) * attr(data-length type(<number>)));
+          top: attr(data-y px);
+          left: attr(data-x px);
+          z-index: 10;
+          /* background-color: red; */
+        }
       }
     }
+  }
+  .player {
+    .board {
+      position: relative;
+      z-index: 1;
+    }
+    .board-cell {
+      &[data-hovered='true'] {
+        background-color: var(--hover-color);
+      }
+    }
+  }
+  .ships {
   }
 }

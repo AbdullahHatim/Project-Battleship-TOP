@@ -3,7 +3,9 @@ import { getBoardDiv } from '../components/board'
 import * as Anim from '@/ui/components/animations'
 import { Stage } from '../components/Stage'
 import { Ship } from '@/classes/Ship'
+import { Gameboard } from '@/classes/Gameboard'
 
+let currentDrag
 export function PreparationStage () {
   const stage = document.createElement('div')
   stage.dataset.stage = 'preparation'
@@ -31,23 +33,45 @@ export function PreparationStage () {
     }
     div.innerHTML = html
 
-    const ships = div.querySelectorAll('[data-coord^="E"]')
-    div.addEventListener('click', (e) => {
-      console.log(e.target)
-    })
+    const ERank = div.querySelectorAll('[data-coord^="E"]')
+
     const ship1 = document.createElement('div')
-    ship1.addEventListener('click', (e) => {
-      console.log(e.target)
-    })
-    // ships[0].addEventListener('click', (e) => {
+    // ship1.addEventListener('click', (e) => {
     //   console.log(e.target)
     // })
     ship1.className = 'draggable-ship'
     ship1.dataset.length = 5
-    ships[0].append(ship1)
+    ERank[0].append(ship1)
+
+    const ships = [ship1]
+    // this is the Drag and Drop core mechanic
+    function hold () {
+      this.dataset.holding = 'true'
+      currentDrag = this
+    }
+    ships.forEach((ship) => {
+      ship.addEventListener('mousedown', hold)
+    })
+    document.addEventListener('mousemove', (e) => {
+      ships.forEach((ship) => {
+        ship.dataset.x = e.pageX
+        ship.dataset.y = e.pageY
+      })
+    })
+    document.addEventListener('mouseup', function () {
+      ships.forEach((ship) => {
+        ship.dataset.holding = 'false'
+      })
+      currentDrag = null
+    })
     return [div]
   }
+  // temp board to place ships in
+  const tempBoard = new Gameboard()
+  window.tempBoard = tempBoard
 
+  // false or new ship coordinates
+  let successfulPlacement = false
   // const ships = new Map()
   function updateBoards () {
     for (const container of boardContainers) {
@@ -55,7 +79,49 @@ export function PreparationStage () {
     }
     prependLettersNumbers(boardContainers[0])
     prependLettersNumbers(boardContainers[1], 5, 5)
-    boardContainers[0].append(getBoardDiv(currentPlayer.gameboard.board))
+
+    const playerDiv = getBoardDiv(tempBoard.board)
+    const cells = playerDiv.querySelectorAll('.board-cell')
+
+    // this is the function that will
+    // 1- check if we are currently dragging a ship if so
+    // 2- get all of the above coords since we always drag the ship from the bottom
+    // 3- if all the coords are of the same length of the dragged ship, then we can place
+    // 4- set the data-hovered and --hover-color and successfulPlacement to array of coords
+    function placeShip (e) {
+      successfulPlacement = false
+      cells.forEach(cell => cell.dataset.hovered = 'false')
+      if (!currentDrag) return
+      const coord = this.dataset.coord
+      const shipLength = currentDrag.dataset.length
+      const coordCharCode = coord.charCodeAt(0)
+      const hoveredCells = []
+      for (let i = 0; i < 5; i++) {
+        const char = String.fromCharCode(coordCharCode - i)
+        const currentHoveredCell = playerDiv.querySelector(`[data-coord="${coord.replace(coord[0], char)}"]`)
+        if (currentHoveredCell) {
+          hoveredCells.push(
+            currentHoveredCell
+          )
+        }
+      }
+      hoveredCells.forEach(cell => cell.dataset.hovered = 'true')
+      if (hoveredCells.length >= shipLength) {
+        successfulPlacement = [...hoveredCells.map(cell => cell.dataset.coord)]
+        hoveredCells.forEach(cell => cell.style.setProperty('--hover-color', 'green'))
+      } else {
+        successfulPlacement = false
+        hoveredCells.forEach(cell => cell.style.setProperty('--hover-color', 'red'))
+      }
+    }
+    for (const cell of cells) {
+      cell.addEventListener('mousemove', placeShip)
+
+      // this will only execute if we actually got some valid coords to work with, then update the tempBoard div (PlayerDiv)
+      cell.addEventListener('mouseup', () => { if (successfulPlacement) { console.log(successfulPlacement); tempBoard.placeShip(...successfulPlacement); updateBoards() } })
+    }
+    // playerDiv.addEventListener('mouseenter', (e) => { console.log('mousemove', e.target) })
+    boardContainers[0].append(playerDiv)
     boardContainers[1].append(...getShipsDiv())
   }
 
