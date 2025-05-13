@@ -13,7 +13,7 @@ export const stageContent = document.createElement('div')
 stageContent.id = 'stage-content'
 content.append(stageContent)
 
-export const prependLettersNumbers = (elem) => {
+export const prependLettersNumbers = (elem, nums = 10, chars = 10) => {
   const letters = document.createElement('div')
   letters.className = 'letters'
   const numbers = document.createElement('div')
@@ -22,11 +22,11 @@ export const prependLettersNumbers = (elem) => {
   let lettersHTML = ''
   let numbersHTML = ''
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < chars; i++) {
     const char = String.fromCharCode(65 + i)
     lettersHTML += `<p>${char}</p>`
   }
-  for (let k = 1; k <= 10; k++) {
+  for (let k = 1; k <= nums; k++) {
     numbersHTML += `<p>${k}</p>`
   }
   // ? messed up the order, easiest fix is to just swap the two
@@ -70,7 +70,7 @@ function gameController () {
     await stage.done()
   }
   async function gameFlow () {
-    // await setStage(PreparationStage())
+    await setStage(PreparationStage())
     await setStage(MainStage())
     await setStage(InfoStage())
   }
