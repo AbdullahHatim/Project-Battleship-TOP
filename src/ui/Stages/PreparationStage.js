@@ -5,7 +5,6 @@ import { Stage } from '../components/Stage'
 import { Ship } from '@/classes/Ship'
 import { Gameboard } from '@/classes/Gameboard'
 
-let currentDrag
 export function PreparationStage () {
   const stage = document.createElement('div')
   stage.dataset.stage = 'preparation'
@@ -19,7 +18,10 @@ export function PreparationStage () {
   </div>`
 
   stage.innerHTML = html
+  let currentDrag
+  let isDragging = false
   const boardContainers = stage.querySelectorAll('.board-container')
+  boardContainers[1].append(getShipsDiv())
   function getShipsDiv () {
     const div = document.createElement('div')
     div.className = 'board ships'
@@ -36,9 +38,7 @@ export function PreparationStage () {
     const ERank = div.querySelectorAll('[data-coord^="E"]')
 
     const ship1 = document.createElement('div')
-    // ship1.addEventListener('click', (e) => {
-    //   console.log(e.target)
-    // })
+
     ship1.className = 'draggable-ship'
     ship1.dataset.length = 5
     ERank[0].append(ship1)
@@ -48,6 +48,7 @@ export function PreparationStage () {
     function hold () {
       this.dataset.holding = 'true'
       currentDrag = this
+      isDragging = true
     }
     ships.forEach((ship) => {
       ship.addEventListener('mousedown', hold)
@@ -62,9 +63,9 @@ export function PreparationStage () {
       ships.forEach((ship) => {
         ship.dataset.holding = 'false'
       })
-      currentDrag = null
+      isDragging = false
     })
-    return [div]
+    return div
   }
   // temp board to place ships in
   const tempBoard = new Gameboard()
@@ -72,16 +73,38 @@ export function PreparationStage () {
 
   // false or new ship coordinates
   let successfulPlacement = false
+  const padding = 1
   // const ships = new Map()
   function updateBoards () {
-    for (const container of boardContainers) {
-      container.innerHTML = ''
-    }
+    boardContainers[0].innerHTML = ''
     prependLettersNumbers(boardContainers[0])
     prependLettersNumbers(boardContainers[1], 5, 5)
 
     const playerDiv = getBoardDiv(tempBoard.board)
     const cells = playerDiv.querySelectorAll('.board-cell')
+
+    function getAdjacentCells (cell) {
+      const adjacentCells = []
+      // get all 8 padding cells
+      const coord = cell.dataset.coord
+      for (let rank = -1; rank < 2; rank++) {
+        const char = String.fromCharCode(coord.charCodeAt(0) - rank)
+        // const currentRank = (coord.replace(coord[0], char))[0]
+        for (let file = -1; file < 2; file++) {
+          const currentFile = coord.slice(1) * 1
+          const currentPaddingCell = playerDiv.querySelector(`[data-coord="${char}${currentFile - file}"]`)
+          if (
+            currentPaddingCell &&
+            !(adjacentCells.includes(currentPaddingCell))
+          ) { adjacentCells.push(currentPaddingCell) }
+        }
+      }
+      adjacentCells.forEach(cell => {
+        if (cell.dataset.value !== 'ship') cell.dataset.padding = 'true'
+      })
+      // adjacentCells.forEach(cell => cell.style.backgroundColor = 'red')
+      return adjacentCells
+    }
 
     // this is the function that will
     // 1- check if we are currently dragging a ship if so
@@ -91,29 +114,34 @@ export function PreparationStage () {
     function placeShip (e) {
       successfulPlacement = false
       cells.forEach(cell => cell.dataset.hovered = 'false')
-      if (!currentDrag) return
+      cells.forEach(cell => cell.dataset.padding = 'false')
+      if (!isDragging) return
       const coord = this.dataset.coord
       const shipLength = currentDrag.dataset.length
       const coordCharCode = coord.charCodeAt(0)
       const hoveredCells = []
+      const paddingCells = []
       for (let i = 0; i < 5; i++) {
         const char = String.fromCharCode(coordCharCode - i)
         const currentHoveredCell = playerDiv.querySelector(`[data-coord="${coord.replace(coord[0], char)}"]`)
         if (currentHoveredCell) {
+          paddingCells.push(...getAdjacentCells(currentHoveredCell))
           hoveredCells.push(
             currentHoveredCell
           )
         }
       }
       hoveredCells.forEach(cell => cell.dataset.hovered = 'true')
-      if (hoveredCells.length >= shipLength) {
+      if (hoveredCells.length >= shipLength && paddingCells.every(cell => cell.dataset.value !== 'ship')) {
         successfulPlacement = [...hoveredCells.map(cell => cell.dataset.coord)]
-        hoveredCells.forEach(cell => cell.style.setProperty('--hover-color', 'green'))
+        document.documentElement.style.setProperty('--hover-color', 'var(--hover-valid)')
+        // currentDrag.remove()
       } else {
         successfulPlacement = false
-        hoveredCells.forEach(cell => cell.style.setProperty('--hover-color', 'red'))
+        document.documentElement.style.setProperty('--hover-color', 'var(--hover-error)')
       }
     }
+
     for (const cell of cells) {
       cell.addEventListener('mousemove', placeShip)
 
@@ -122,7 +150,6 @@ export function PreparationStage () {
     }
     // playerDiv.addEventListener('mouseenter', (e) => { console.log('mousemove', e.target) })
     boardContainers[0].append(playerDiv)
-    boardContainers[1].append(...getShipsDiv())
   }
 
   async function update () {

@@ -19,6 +19,10 @@
   --ship-color: blue;
   --transition-time: 500ms;
   --board-cell-border: 1px;
+  --hover-error: red;
+  --hover-valid: blue;
+  --hover-color: var(--hover-valid);
+  --padding-color: color-mix(in srgb, var(--hover-color), transparent 70%);
 }
 [data-stage] {
   width: 100%;
@@ -291,7 +295,12 @@
       z-index: 1;
     }
     .board-cell {
+      &[data-padding='true'] {
+        background-color: var(--padding-color);
+        /* opacity: 0.2; */
+      }
       &[data-hovered='true'] {
+        opacity: 1;
         background-color: var(--hover-color);
       }
     }
