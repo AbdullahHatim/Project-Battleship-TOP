@@ -20,8 +20,27 @@ export function PreparationStage () {
   stage.innerHTML = html
   let currentDrag
   let isDragging = false
+  function createElementFromHTML (htmlString) {
+    const div = document.createElement('div')
+    div.innerHTML = htmlString.trim()
+
+    // Change this to div.childNodes to support multiple top-level nodes.
+    return div.firstChild
+  }
+  const ships = [
+    '<div class="draggable-ship" data-rotation="0" data-length="5"></div>',
+    '<div class="draggable-ship" data-rotation="0" data-length="4"></div>',
+    '<div class="draggable-ship" data-rotation="0" data-length="3"></div>',
+    '<div class="draggable-ship" data-rotation="0" data-length="3"></div>',
+    '<div class="draggable-ship" data-rotation="0" data-length="2"></div>'
+  ]
+    .map(html => createElementFromHTML(html))
   const boardContainers = stage.querySelectorAll('.board-container')
-  boardContainers[1].append(getShipsDiv())
+
+  function removeShip (currship) {
+    const shipIndex = ships.findIndex(ship => ship === currship)
+    ships[shipIndex] = null
+  }
   function getShipsDiv () {
     const div = document.createElement('div')
     div.className = 'board ships'
@@ -37,35 +56,46 @@ export function PreparationStage () {
 
     const ERank = div.querySelectorAll('[data-coord^="E"]')
 
-    const ship1 = document.createElement('div')
+    for (let i = 0; i < 5; i++) { if (ships[i]) ERank[i].append(ships[i]) }
 
-    ship1.className = 'draggable-ship'
-    ship1.dataset.length = 5
-    ERank[0].append(ship1)
-
-    const ships = [ship1]
-    // this is the Drag and Drop core mechanic
+    return div
+  }
+  addEventListeners()
+  function addEventListeners () {
     function hold () {
       this.dataset.holding = 'true'
       currentDrag = this
       isDragging = true
     }
-    ships.forEach((ship) => {
+    function rotate (e) {
+      if (e.code !== 'KeyR') return
+      if (!isDragging) return
+      const currentRotation = currentDrag.dataset.rotation * 1 ? 0 : 1
+      currentDrag.dataset.rotation = `${currentRotation}`
+    }
+    const validShips = ships.filter(ship => ship)
+    validShips.forEach((ship) => {
       ship.addEventListener('mousedown', hold)
     })
+
+    document.addEventListener('keypress', rotate)
     document.addEventListener('mousemove', (e) => {
-      ships.forEach((ship) => {
+      validShips.forEach((ship) => {
         ship.dataset.x = e.pageX
         ship.dataset.y = e.pageY
       })
     })
     document.addEventListener('mouseup', function () {
-      ships.forEach((ship) => {
+      validShips.forEach((ship) => {
         ship.dataset.holding = 'false'
       })
       isDragging = false
+      if (currentDrag) { currentDrag.dataset.rotation = '0' }
     })
-    return div
+  }
+  function updateShipsDiv () {
+    boardContainers[1].innerHTML = ''
+    boardContainers[1].append(getShipsDiv())
   }
   // temp board to place ships in
   const tempBoard = new Gameboard()
@@ -118,24 +148,38 @@ export function PreparationStage () {
       if (!isDragging) return
       const coord = this.dataset.coord
       const shipLength = currentDrag.dataset.length
+      const rotation = currentDrag.dataset.rotation * 1
       const coordCharCode = coord.charCodeAt(0)
       const hoveredCells = []
       const paddingCells = []
-      for (let i = 0; i < 5; i++) {
-        const char = String.fromCharCode(coordCharCode - i)
-        const currentHoveredCell = playerDiv.querySelector(`[data-coord="${coord.replace(coord[0], char)}"]`)
-        if (currentHoveredCell) {
-          paddingCells.push(...getAdjacentCells(currentHoveredCell))
-          hoveredCells.push(
-            currentHoveredCell
-          )
+
+      if (!rotation) {
+        for (let i = 0; i < shipLength; i++) {
+          const char = String.fromCharCode(coordCharCode - i)
+          const currentHoveredCell = playerDiv.querySelector(`[data-coord="${coord.replace(coord[0], char)}"]`)
+          if (currentHoveredCell) {
+            paddingCells.push(...getAdjacentCells(currentHoveredCell))
+            hoveredCells.push(
+              currentHoveredCell
+            )
+          }
+        }
+      } else {
+        for (let i = 0; i < shipLength; i++) {
+          const number = (coord.slice(1) * 1) - i
+          const currentHoveredCell = playerDiv.querySelector(`[data-coord="${coord[0]}${number}"]`)
+          if (currentHoveredCell) {
+            paddingCells.push(...getAdjacentCells(currentHoveredCell))
+            hoveredCells.push(
+              currentHoveredCell
+            )
+          }
         }
       }
       hoveredCells.forEach(cell => cell.dataset.hovered = 'true')
       if (hoveredCells.length >= shipLength && paddingCells.every(cell => cell.dataset.value !== 'ship')) {
         successfulPlacement = [...hoveredCells.map(cell => cell.dataset.coord)]
         document.documentElement.style.setProperty('--hover-color', 'var(--hover-valid)')
-        // currentDrag.remove()
       } else {
         successfulPlacement = false
         document.documentElement.style.setProperty('--hover-color', 'var(--hover-error)')
@@ -146,7 +190,7 @@ export function PreparationStage () {
       cell.addEventListener('mousemove', placeShip)
 
       // this will only execute if we actually got some valid coords to work with, then update the tempBoard div (PlayerDiv)
-      cell.addEventListener('mouseup', () => { if (successfulPlacement) { console.log(successfulPlacement); tempBoard.placeShip(...successfulPlacement); updateBoards() } })
+      cell.addEventListener('mouseup', () => { if (successfulPlacement) { console.log(successfulPlacement); tempBoard.placeShip(...successfulPlacement); removeShip(currentDrag); update() } })
     }
     // playerDiv.addEventListener('mouseenter', (e) => { console.log('mousemove', e.target) })
     boardContainers[0].append(playerDiv)
@@ -154,6 +198,7 @@ export function PreparationStage () {
 
   async function update () {
     updateBoards()
+    updateShipsDiv()
   }
   async function ready () {}
   async function done () {}
