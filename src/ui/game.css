@@ -208,11 +208,6 @@
     }
   }
 
-  .player {
-    .board {
-      height: calc(var(--cell-width) * 10);
-    }
-  }
   .ships {
     user-select: none;
     -webkit-user-drag: none;
@@ -220,6 +215,13 @@
     .board {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
+      .board-cell {
+        height: var(--cell-width);
+      }
+    }
+  }
+  .player {
+    .board {
       .board-cell {
         height: var(--cell-width);
       }
@@ -258,6 +260,10 @@
 
       &[data-value='ship'] {
         background-color: var(--ship-color);
+        border: none;
+      }
+      &[data-value='oldShip'] {
+        background-color: green;
         border: none;
       }
 
