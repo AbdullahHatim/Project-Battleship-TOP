@@ -15,6 +15,7 @@ export function PreparationStage () {
     </div>
     <div class="board-container ships" data-name="${currentPlayer.name}">
     </div>
+    <button class="confirm">Confirm?</button>
   </div>`
 
   stage.innerHTML = html
@@ -36,6 +37,9 @@ export function PreparationStage () {
     '<div class="draggable-ship" data-rotation="0" data-length="2" data-index="4"></div>'
   ]
     .map(html => createElementFromHTML(html))
+  // If every ship is null confirm button should finishup this stage
+  const confirmButton = stage.querySelector('button.confirm')
+  confirmButton.onclick = () => { if (ships.every(ship => ship === null)) finishUp() }
   const boardContainers = stage.querySelectorAll('.board-container')
 
   function moveShipFromShipDivToPlayerDiv (currship, cell) {
@@ -157,7 +161,6 @@ export function PreparationStage () {
   }
   // temp board to place ships in
   const tempBoard = new Gameboard()
-  window.tempBoard = tempBoard
 
   // false or new ship coordinates
   let successfulPlacement = false
@@ -249,7 +252,7 @@ export function PreparationStage () {
       cell.addEventListener('mousemove', prepareShipPlacementInPlayerDiv)
 
       // this will only execute if we actually got some valid coords to work with, then update the tempBoard div (PlayerDiv)
-      cell.addEventListener('mouseup', function () { if (successfulPlacement) { console.log(successfulPlacement); tempBoard.placeShip(...successfulPlacement); moveShipFromShipDivToPlayerDiv(currentDrag, this); addCoordsToCurrentDrag(successfulPlacement, currentDrag); update() } })
+      cell.addEventListener('mouseup', function () { if (successfulPlacement) { tempBoard.placeShip(...successfulPlacement); moveShipFromShipDivToPlayerDiv(currentDrag, this); addCoordsToCurrentDrag(successfulPlacement, currentDrag); update() } })
     }
     // playerDiv.addEventListener('mouseenter', (e) => { console.log('mousemove', e.target) })
     boardContainers[0].append(playerDiv)
@@ -261,7 +264,9 @@ export function PreparationStage () {
     updateShipsDiv()
   }
   async function ready () {}
-  async function done () {}
+  async function done () {
+    currentPlayer.gameboard.board = new Map(tempBoard.board)
+  }
   const doneButton = document.createElement('button')
   function finishUp () {
     doneButton.click()
@@ -274,5 +279,5 @@ export function PreparationStage () {
 
   update()
 
-  return Object.assign(new Stage(), { name: 'info', stage, update, ready, done, isDone, finishUp, doneButton })
+  return Object.assign(new Stage(), { name: 'prepare', stage, update, ready, done, isDone, finishUp, doneButton })
 }

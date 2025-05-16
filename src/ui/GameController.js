@@ -4,9 +4,7 @@ import 'animate.css'
 import './game.css'
 import './animation.css'
 import { Stage } from './components/Stage'
-import { PreparationStage } from './Stages/PreparationStage'
-import { MainStage } from './Stages/MainStage'
-import { InfoStage } from './Stages/InfoStage'
+import { PreparationStage, MainStage, InfoStage, SetSecondPlayerStage } from '@/ui/Stages/Stages'
 
 const content = document.querySelector('#content')
 export const stageContent = document.createElement('div')
@@ -47,7 +45,10 @@ export const resetPlayers = () => {
   currentPlayer = players[0]
   otherPlayer = players[1]
 }
-
+export const setSecondPlayer = (name, isComputer = false) => {
+  players[1] = new Player(name, isComputer)
+  otherPlayer = players[1]
+}
 export const switchPlayer = () => {
   [currentPlayer, otherPlayer] = [otherPlayer, currentPlayer]
 }
@@ -56,7 +57,7 @@ function gameController () {
   currentPlayer.gameboard.placeShip('A1', 'A2')
   currentPlayer.gameboard.placeShip('B5', 'C5', 'D5', 'E5', 'F5')
   currentPlayer.gameboard.placeShip('J10')
-  otherPlayer.gameboard.placeShip('A10', 'B10')
+  // otherPlayer.gameboard.placeShip('A10', 'B10')
 
   // TODO: Add Flow Control function so That stages don't know about each other
   // * Each stage when they are done just release a isDone signal witch we wait for
@@ -68,9 +69,16 @@ function gameController () {
     await stage.ready()
     await stage.isDone()
     await stage.done()
+    return stage
   }
+  // TODO: IMPROVE EVERYTHING ITS WORKING YES BUT DOG WATER
   async function gameFlow () {
     await setStage(PreparationStage())
+    const secondPlayerStage = await setStage(SetSecondPlayerStage())
+    if (secondPlayerStage.name === 'player') {
+      switchPlayer()
+      await setStage(PreparationStage())
+    }
     await setStage(MainStage())
     await setStage(InfoStage())
   }
