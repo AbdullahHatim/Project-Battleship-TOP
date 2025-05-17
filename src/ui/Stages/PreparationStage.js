@@ -1,4 +1,4 @@
-import { switchPlayer, currentPlayer, otherPlayer, winner, prependLettersNumbers } from '../gameController'
+import { switchPlayer, currentPlayer, otherPlayer, winner, prependLettersNumbers, stageContent } from '../gameController'
 import { getBoardDiv } from '../components/board'
 import * as Anim from '@/ui/components/animations'
 import { Stage } from '../components/Stage'
@@ -7,6 +7,7 @@ import { Gameboard } from '@/classes/Gameboard'
 
 export function PreparationStage () {
   const stage = document.createElement('div')
+  stageContent.style.backgroundColor = 'teal'
   stage.dataset.stage = 'preparation'
   stage.className = 'stage'
   const html = /* js */`

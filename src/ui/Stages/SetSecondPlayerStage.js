@@ -1,10 +1,11 @@
-import { switchPlayer, currentPlayer, otherPlayer, winner, prependLettersNumbers, setSecondPlayer } from '../gameController'
+import { switchPlayer, currentPlayer, otherPlayer, winner, prependLettersNumbers, setSecondPlayer, stageContent } from '../gameController'
 import { getBoardDiv } from '../components/board'
 import * as Anim from '@/ui/components/animations'
 import { Stage } from '../components/Stage'
 
 export function SetSecondPlayerStage () {
   const stage = document.createElement('div')
+  stageContent.style.backgroundColor = ''
   stage.dataset.stage = 'secondPlayer'
   stage.className = 'stage'
   stage.innerHTML = `
