@@ -192,8 +192,8 @@
     position: relative;
 
     &[data-name] {
-      &::before {
-        content: attr(data-name);
+      --content: attr(data-name);
+      .tag {
         position: absolute;
         width: 50%;
         background-color: inherit;
@@ -208,6 +208,11 @@
         box-sizing: border-box;
         font-size: 1.5em;
         font-weight: bold;
+        border: none;
+        outline: none;
+        &::before {
+          content: var(--content);
+        }
       }
     }
   }

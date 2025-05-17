@@ -12,11 +12,13 @@ export function PreparationStage () {
   const html = /* js */`
   <div class="boards">
     <div class="board-container player" data-name="${currentPlayer.name}">
+      <div class="tag"></div>
     </div>
     <div class="second-column">
-      <div class="board-container ships" data-name="${currentPlayer.name}">
+      <div class="board-container ships" data-name="Ships">
+        <div class="tag"></div>
       </div>
-      <div class="button-container"><button class="confirm">Confirm?</button></div>
+      <div class="button-container"><button class="confirm">Confirm</button></div>
     </div>
   </div>`
 
@@ -158,6 +160,7 @@ export function PreparationStage () {
   }
   function updateShipsDiv () {
     boardContainers[1].innerHTML = ''
+    boardContainers[1].append(createElementFromHTML('<div class="tag"></div>'))
     boardContainers[1].append(getShipsDiv())
     validShips.forEach((ship) => {
       ship.removeEventListener('mousedown', hold)
@@ -198,6 +201,9 @@ export function PreparationStage () {
     boardContainers[0].innerHTML = ''
     prependLettersNumbers(boardContainers[0])
     prependLettersNumbers(boardContainers[1], 5, 5)
+    const renameButton = createElementFromHTML('<button class="tag"></button>')
+    boardContainers[0].append(renameButton)
+    renameButton.onclick = () => { const playerName = window.prompt('Enter New Name'); if (playerName) currentPlayer.name = playerName; boardContainers[0].dataset.name = playerName }
 
     const playerDiv = getBoardDiv(tempBoard.board)
     const cells = playerDiv.querySelectorAll('.board-cell')
@@ -284,9 +290,20 @@ export function PreparationStage () {
     addEventListeners()
     updateShipsDiv()
   }
-  async function ready () {}
+  async function ready () {
+    const boards = stage.querySelector('.boards')
+    boards.style.animation = 'fadeInUpBig 1000ms forwards paused'
+    Anim.startAnimation(boards)
+    await Anim.onAnimationEnd(boards)
+  }
   async function done () {
     currentPlayer.gameboard.board = new Map(tempBoard.board)
+
+    await Anim.wait(200)
+    const boards = stage.querySelector('.boards')
+    boards.style.animation = 'fadeOutDownBig 1000ms forwards paused'
+    Anim.startAnimation(boards)
+    await Anim.onAnimationEnd(boards)
   }
   const doneButton = document.createElement('button')
   function finishUp () {
