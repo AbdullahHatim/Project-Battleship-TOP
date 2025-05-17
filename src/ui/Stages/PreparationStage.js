@@ -13,9 +13,11 @@ export function PreparationStage () {
   <div class="boards">
     <div class="board-container player" data-name="${currentPlayer.name}">
     </div>
-    <div class="board-container ships" data-name="${currentPlayer.name}">
+    <div class="second-column">
+      <div class="board-container ships" data-name="${currentPlayer.name}">
+      </div>
+      <div class="button-container"><button class="confirm">Confirm?</button></div>
     </div>
-    <button class="confirm">Confirm?</button>
   </div>`
 
   stage.innerHTML = html
@@ -39,7 +41,7 @@ export function PreparationStage () {
     .map(html => createElementFromHTML(html))
   // If every ship is null confirm button should finishup this stage
   const confirmButton = stage.querySelector('button.confirm')
-  confirmButton.onclick = () => { if (ships.every(ship => ship === null)) finishUp() }
+  confirmButton.onclick = () => { if (ships.every(ship => ship === null)) { finishUp() } else { shakeShipsDiv() } }
   const boardContainers = stage.querySelectorAll('.board-container')
 
   function moveShipFromShipDivToPlayerDiv (currship, cell) {
@@ -254,13 +256,13 @@ export function PreparationStage () {
 
     for (const cell of cells) {
       cell.addEventListener('mousemove', prepareShipPlacementInPlayerDiv)
-      
+
       // ? so the hover is cleared after the ship left the playerDiv
       cell.addEventListener('mouseleave', () => {
         cells.forEach(cell => cell.dataset.hovered = 'false')
         cells.forEach(cell => cell.dataset.padding = 'false')
       })
-      
+
       // ? so the Ship hover updates when .draggable-ship is rotates
       cell.tabIndex = -1
       cell.addEventListener('mouseenter', () => { cell.focus() })
@@ -271,7 +273,12 @@ export function PreparationStage () {
 
     boardContainers[0].append(playerDiv)
   }
-
+  async function shakeShipsDiv () {
+    const shipsDiv = stage.querySelector('.ships')
+    shipsDiv.style.animation = 'headShake 1000ms paused'
+    await Anim.onAnimation(shipsDiv)
+    shipsDiv.style.animation = ''
+  }
   async function update () {
     updateBoards()
     addEventListeners()
