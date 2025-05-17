@@ -254,11 +254,21 @@ export function PreparationStage () {
 
     for (const cell of cells) {
       cell.addEventListener('mousemove', prepareShipPlacementInPlayerDiv)
-
+      
+      // ? so the hover is cleared after the ship left the playerDiv
+      cell.addEventListener('mouseleave', () => {
+        cells.forEach(cell => cell.dataset.hovered = 'false')
+        cells.forEach(cell => cell.dataset.padding = 'false')
+      })
+      
+      // ? so the Ship hover updates when .draggable-ship is rotates
+      cell.tabIndex = -1
+      cell.addEventListener('mouseenter', () => { cell.focus() })
+      cell.addEventListener('keyup', prepareShipPlacementInPlayerDiv)
       // this will only execute if we actually got some valid coords to work with, then update the tempBoard div (PlayerDiv)
       cell.addEventListener('mouseup', function () { if (successfulPlacement) { tempBoard.placeShip(...successfulPlacement); moveShipFromShipDivToPlayerDiv(currentDrag, this); addCoordsToCurrentDrag(successfulPlacement, currentDrag); update() } })
     }
-    // playerDiv.addEventListener('mouseenter', (e) => { console.log('mousemove', e.target) })
+
     boardContainers[0].append(playerDiv)
   }
 
