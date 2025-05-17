@@ -302,6 +302,7 @@
       z-index: 1;
     }
     .board-cell {
+      position: relative;
       &[data-padding='true'] {
         background-color: var(--padding-color);
         /* opacity: 0.2; */
@@ -310,8 +311,18 @@
         opacity: 1;
         background-color: var(--hover-color);
       }
+      .draggable-ship {
+      }
     }
   }
   .ships {
+    .board-cell {
+      .draggable-ship[data-holding='false'] {
+        &[data-rotation='1'] {
+          transform-origin: 50% calc((var(--cell-width) + 3px) * 0.5);
+          rotate: 180deg;
+        }
+      }
+    }
   }
 }

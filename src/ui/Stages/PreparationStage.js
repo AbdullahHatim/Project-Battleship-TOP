@@ -54,7 +54,7 @@ export function PreparationStage () {
     cells.forEach(cell => {
       const coord = cell.dataset.coord
       const ship = playerShips.get(coord)
-      if (ship) cell.append(ship)
+      if (ship) { ship.dataset.holding = 'false'; cell.append(ship) }
     })
   }
   function appendShipToCell (ship, cell) {
@@ -86,9 +86,13 @@ export function PreparationStage () {
   function resetShip (ship) {
     const playerDiv = document.querySelector('.player')
     if (!playerDiv.contains(ship)) return // obviously
-    // TODO: 1- remove it from The Player's Board
+    // TODO: 1- remove it from The Player's Board & its Entry on playerShips Map
+    const parentCell = ship.parentElement
+    // FIX: Ship on the player's DIV Doesn't update .draggable-ship position if it had its position Re-changed
+    playerShips.delete(parentCell.dataset.coord)
     ship.remove()
     const coordsArr = (ship.dataset.coordsArr).split(',')
+    // ship.dataset.coordsArr = ''
     // TODO: 2- remove it from tempBoard
     for (const coord of coordsArr) {
       tempBoard.board.set(coord, null)
@@ -133,7 +137,7 @@ export function PreparationStage () {
       ship.dataset.holding = 'false'
     })
     isDragging = false
-    if (currentDrag) { currentDrag.dataset.rotation = '0' }
+    // if (currentDrag) { currentDrag.dataset.rotation = '0' } // this was the workaround to reset rotation on Ships Div so they always appear up right
   }
 
   function addEventListeners () {
