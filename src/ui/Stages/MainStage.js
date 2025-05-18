@@ -29,7 +29,9 @@ export function MainStage () {
     const currentPlayerAttackBoard = getBoardDiv(currentPlayer.gameboard.attacks)
     currentPlayerAttackBoard.classList.add('overlay')
     boardContainers[0].append(getBoardDiv(currentPlayer.gameboard.board), currentPlayerAttackBoard)
+    boardContainers[0].dataset.name = currentPlayer.name
     boardContainers[1].append(getBoardDiv(otherPlayer.gameboard.attacks, true))
+    boardContainers[1].dataset.name = otherPlayer.name
   }
   async function makeComputerMove () {
     let randomNumber = Math.floor((10 * Math.random()) + 1)
@@ -98,14 +100,44 @@ export function MainStage () {
       currentPlayer.gameboard.receiveAttack(playerCell.dataset.coord)
       playerCell.dataset.value = `${currentPlayer.gameboard.attacks.get(playerCell.dataset.coord)}`
       await Anim.onAnimationEnd(playerCell)
-    } else {
-      switchPlayer()
+    } else /* IF there is another Player */ {
+      await nextPlayer()
+      isUpdating = false
+      return
     }
 
     updateBoards()
     isUpdating = false
   }
+  async function nextPlayer () {
+    const div = document.createElement('div')
+    div.className = 'next-player'
+    div.innerHTML = `
+    <div class="inner">
+      <h1>${otherPlayer.name}'s Turn</h1>
+      <button>Ready</button>
+    </div>
+    `
 
+    // Let The current Player process their attack
+    await Anim.wait(600)
+    stage.append(div)
+
+    // Wait for the slidein before switching or updating the Board
+    div.style.animation = 'slideInRight 500ms cubic-bezier(0.075, 0.82, 0.165, 1) paused'
+    await Anim.onAnimation(div)
+    // update the board while no one is looking (unless the cheat)
+    switchPlayer()
+    updateBoards()
+
+    // Now wait until the player is ready to remove the div
+    const button = div.querySelector('button')
+    await new Promise(r => button.addEventListener('click', r))
+    div.style.animation = 'slideOutRight 300ms ease-in paused'
+    await Anim.onAnimation(div)
+
+    div.remove()
+  }
   for (const container of boardContainers) {
     container.addEventListener('click', update)
   }

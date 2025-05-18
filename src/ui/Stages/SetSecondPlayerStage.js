@@ -10,10 +10,14 @@ export function SetSecondPlayerStage () {
   stage.className = 'stage'
   stage.innerHTML = `
   <div class="select">
+    <p class="title"></p>
     <button class="setPlayer">Player</button>
     <button class="setComputer">Computer</button>
   </div>
   `
+  const title = stage.querySelector('.title')
+  title.textContent = 'Choose Player 2'
+
   const stageObj = new Stage()
 
   stageObj.name = ''// used as communication between this stage and the preparation stage
