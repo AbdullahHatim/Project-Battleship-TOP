@@ -292,6 +292,7 @@
   .ships,
   .confirm {
     background: red;
+    --background: red;
   }
 }
 #stage-content:has([data-name~='blue' i]) {
@@ -299,6 +300,7 @@
   .ships,
   .confirm {
     background: blue;
+    --background: blue;
   }
 }
 #stage-content:has([data-name~='yellow' i]) {
@@ -306,6 +308,7 @@
   .ships,
   .confirm {
     background-color: yellow;
+    --background: yellow;
     color: black;
     --font-color: black;
   }
@@ -318,6 +321,7 @@
   .ships,
   .confirm {
     background: green;
+    --background: green;
   }
 }
 #stage-content:has([data-name~='purple' i]) {
@@ -325,6 +329,7 @@
   .ships,
   .confirm {
     background: purple;
+    --background: purple;
   }
 }
 #stage-content:has([data-name~='black' i]) {
@@ -332,6 +337,7 @@
   .ships,
   .confirm {
     background: black;
+    --background: black;
   }
 }
 
@@ -340,6 +346,7 @@
   .ships,
   .confirm {
     background-color: white;
+    --background: white;
     color: black;
     --font-color: black;
   }

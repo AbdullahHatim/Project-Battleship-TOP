@@ -550,12 +550,14 @@
     margin: 0;
     padding: 0;
   }
+  background-image: none !important;
+  background-color: teal !important;
   .card {
     position: relative;
     border-radius: 6px;
-    background: var(--background, teal);
+    background: var(--background, rgb(0, 121, 121));
     background-size: cover;
-    background-position: 0 20%;
+    background-position: 0 40%;
     height: 100%;
     display: flex;
     flex-direction: column;

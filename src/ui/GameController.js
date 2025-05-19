@@ -82,6 +82,7 @@ function gameController () {
     // ? so the game starts with Player 1
     switchPlayer()
     await setStage(MainStage())
+
     await setStage(InfoStage())
   }
   gameFlow()
