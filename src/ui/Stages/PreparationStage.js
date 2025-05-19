@@ -7,7 +7,7 @@ import { Gameboard } from '@/classes/Gameboard'
 
 export function PreparationStage () {
   const stage = document.createElement('div')
-  stageContent.style.backgroundColor = 'teal'
+  // stageContent.style.backgroundColor = 'teal'
   stage.dataset.stage = 'preparation'
   stage.className = 'stage'
   const html = /* js */`
@@ -198,13 +198,20 @@ export function PreparationStage () {
     // adjacentCells.forEach(cell => cell.style.backgroundColor = 'red')
     return adjacentCells
   }
+  const skins = `
+
+Available Skins:
+galaxy    cat     cat2      randomcat   neoncat   rubik   ???
+rainbow   red     blue      green       yellow    white   black   purple
+troll     troll2  glitter   glitter2    car       car2    car3    ali
+  `
   function updateBoards () {
     boardContainers[0].innerHTML = ''
     prependLettersNumbers(boardContainers[0])
     prependLettersNumbers(boardContainers[1], 5, 5)
     const renameButton = createElementFromHTML('<button class="tag"></button>')
     boardContainers[0].append(renameButton)
-    renameButton.onclick = () => { const playerName = window.prompt('Enter New Name'); if (playerName) currentPlayer.name = playerName; boardContainers[0].dataset.name = playerName }
+    renameButton.onclick = () => { const playerName = window.prompt(`Enter New Name\nTo get Skin add [skin name] to your name (do not combine skins)\nexample: galaxy ali\nexample: bob galaxy${skins}`); if (playerName) { currentPlayer.name = playerName; boardContainers[0].dataset.name = playerName } }
 
     const playerDiv = getBoardDiv(tempBoard.board)
     const cells = playerDiv.querySelectorAll('.board-cell')

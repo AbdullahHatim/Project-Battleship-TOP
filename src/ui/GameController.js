@@ -3,6 +3,7 @@ import * as Anim from './components/animations'
 import 'animate.css'
 import './game.css'
 import './animation.css'
+import './skins.css'
 import { Stage } from './components/Stage'
 import { PreparationStage, MainStage, InfoStage, SetSecondPlayerStage } from '@/ui/Stages/Stages'
 
@@ -32,7 +33,7 @@ export const prependLettersNumbers = (elem, nums = 10, chars = 10) => {
   numbers.innerHTML = lettersHTML
   elem.prepend(letters, numbers)
 }
-export const players = [new Player('player1'), new Player('computer', true)]
+export const players = [new Player('Click To Rename'), new Player('computer', true)]
 export let currentPlayer = players[0]
 export let otherPlayer = players[1]
 export let winner
@@ -54,14 +55,10 @@ export const switchPlayer = () => {
 }
 // where all the magic happens (connects everything together, DOM, Players, and Game flow/ Animations)
 function gameController () {
-  currentPlayer.gameboard.placeShip('A1', 'A2')
-  currentPlayer.gameboard.placeShip('B5', 'C5', 'D5', 'E5', 'F5')
-  currentPlayer.gameboard.placeShip('J10')
-  // otherPlayer.gameboard.placeShip('A10', 'B10')
-
   // TODO: Add Flow Control function so That stages don't know about each other
   // * Each stage when they are done just release a isDone signal witch we wait for
 
+  // TODO: Mthis seems a bit pure (xept stageContent), maybe put it in Stage.js
   async function setStage (stage) {
     Stage.validateProperties(stage)
     stageContent.innerHTML = ''
@@ -72,22 +69,22 @@ function gameController () {
     return stage
   }
   // TODO: IMPROVE EVERYTHING ITS WORKING YES BUT DOG WATER
+  // TODO: Ability To rename player 1
   async function gameFlow () {
     await setStage(PreparationStage())
     const secondPlayerStage = await setStage(SetSecondPlayerStage())
+
+    // ? switch regardless of second player so that the second switch works properly
+    switchPlayer()
     if (secondPlayerStage.name === 'player') {
-      switchPlayer()
       await setStage(PreparationStage())
     }
+    // ? so the game starts with Player 1
+    switchPlayer()
     await setStage(MainStage())
     await setStage(InfoStage())
   }
   gameFlow()
-
-  // (async () => { await new Promise(r => setTimeout(r, 2000)); setStage(InfoStage); console.log('done') })()
-  function refreshStage () {
-    currentStage.update()
-  }
 }
 
 export { gameController }
