@@ -14,7 +14,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './src/template.html'
     }),
-    // new FaviconsWebpackPlugin('./assets/logo.png')
+    new FaviconsWebpackPlugin('./assets/logo.svg')
   ],
   module: {
     rules: [
